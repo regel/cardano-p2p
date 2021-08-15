@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"time"
@@ -64,6 +65,9 @@ func isJSON(s string) bool {
 }
 
 func subscribe(cmd *cobra.Command, args []string) {
+	if Password == "" {
+		Password = viper.GetString("password")
+	}
 	// Create a new Redis Client
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     Addr,
