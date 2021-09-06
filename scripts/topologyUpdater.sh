@@ -78,12 +78,29 @@ fi
 
 if [[ ${TU_PUSH} = "Y" ]]; then
   if [[ ${IP_VERSION} = "4" || ${IP_VERSION} = "mix" ]]; then
-    curl -s -f -4 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}"
+    STR=$(curl -s -f -4 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
   fi
   if [[ ${IP_VERSION} = "6" || ${IP_VERSION} = "mix" ]]; then
-    curl -s -f -6 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}"
+    STR=$(curl -s -f -6 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
   fi
+  CODE='"resultcode": "([0-9]*)"'
+  CLIENTIP='"clientIp": "([0-9.]*)"'
+  MSG='"msg": "([^"]*)"'
+
+  [[ "$STR" =~ $CODE ]]
+  code=${BASH_REMATCH[1]}
+  [[ "$STR" =~ $CLIENTIP ]]
+  clientip=${BASH_REMATCH[1]}
+  [[ "$STR" =~ $MSG ]]
+  msg=${BASH_REMATCH[1]}
+  
+  if [[ $code -ne 201 ]]; then
+    echo "Push failed, got error='$code' clientIp='$clientip' msg='$msg'" >&2
+    exit 1
+  fi
+  echo "Push ok, got code='$code' clientIp='$clientip' msg='$msg'" >&2
 fi
+
 if [[ ${TU_FETCH} = "Y" ]]; then
   if [[ ${IP_VERSION} = "4" || ${IP_VERSION} = "mix" ]]; then
     curl -s --fail-with-body -4 -o "${TOPOLOGY}" "https://api.clio.one/htopology/v1/fetch/?max=${MAX_PEERS}&magic=${NWMAGIC}&ipv=${IP_VERSION}"
@@ -115,6 +132,8 @@ if [[ ${TU_FETCH} = "Y" ]]; then
       topo=$(jq '.Producers += [{"addr": $addr, "port": $port|tonumber, "valency": $valency|tonumber}]' --arg addr "${addr}" --arg port ${port} --arg valency ${valency} <<< "${topo}")
     done
   fi
-  redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" PUBLISH "${TOPIC}" "${topo}"
+  if [[ -n "${topo}" ]]; then
+    redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" PUBLISH "${TOPIC}" "${topo}"
+  fi
 fi
 exit 0
