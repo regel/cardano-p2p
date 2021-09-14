@@ -15,9 +15,10 @@ FROM alpine:3.10.9
 WORKDIR /
 COPY --from=builder /workspace/topology-updater .
 COPY scripts/topologyUpdater.sh .
+COPY scripts/poolVet.sh .
 
 RUN apk update \
-  && apk add bash curl jq redis
+  && apk add bash curl jq redis parallel coreutils
 
 USER 65532:65532
 

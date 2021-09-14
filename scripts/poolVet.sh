@@ -2,6 +2,8 @@
 # shellcheck disable=SC2086,SC2034
 # shellcheck source=/dev/null
 
+export SHELL=/bin/bash
+
 # Description : Helper function to validate that input is a number
 #             : $1 = number
 isNumber() {
@@ -90,7 +92,7 @@ echo_meta() {
   metadata=$(curl -Ls --connect-timeout 5 "$url")
   echo "$metadata" | jq -e .ticker &> /dev/null
   if [ $? -eq 0 ] && [ -n "$metadata" ]; then
-    hashed=$(cardano-cli stake-pool metadata-hash --pool-metadata-file /dev/stdin <<< "$metadata")
+    hashed=$(b2sum -b -l 256 <<< "$metadata" | cut -d ' ' -f1)
     echo "$metadata" | jq \
 	    --arg publicKey "$pubkey" \
 	    --arg hashed "$hashed" \
@@ -124,5 +126,5 @@ export TMOUT
     | @tsv
  ' "$FILE";
  )|
-    parallel -j $N_JOBS echo_meta
+    parallel --will-cite -j $N_JOBS echo_meta
 
