@@ -16,10 +16,9 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
@@ -40,10 +39,8 @@ var (
 var subscribeCmd = &cobra.Command{
 	Use:   "subscribe",
 	Short: "Subscribe to Cardano node topology updates",
-	Long: `Shelley has been launched without peer-to-peer (p2p) node discovery so that means we will need to manually add trusted nodes in order to configure our topology. This is a critical step as skipping this step will result in your minted blocks being orphaned by the rest of the network.
-
-This command receives topology updates via Redis Pub/Sub. Data is written o the specified output file.`,
-	Run: subscribe,
+	Long:  `This command receives Producer topology updates via Redis Pub/Sub. Data is written o the specified output file.`,
+	Run:   subscribe,
 }
 
 func init() {

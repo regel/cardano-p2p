@@ -8,7 +8,7 @@ ADD . .
 RUN go mod download
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o topology-updater main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o cardano-p2p main.go
 
 FROM regel/cardano-cli-slim:0.0.3 as cli
 
@@ -29,7 +29,7 @@ COPY --from=cli /opt/cardano-cli /bin/cardano-cli
 # libsodium
 COPY --from=cli /lib/ /lib/
 COPY --from=curl /opt/bin/curl /usr/bin/curl
-COPY --from=builder /workspace/topology-updater .
+COPY --from=builder /workspace/cardano-p2p .
 COPY scripts/topologyUpdater.sh .
 COPY scripts/poolVet.sh .
 
@@ -43,4 +43,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 USER 65532:65532
 
-ENTRYPOINT ["/topology-updater"]
+ENTRYPOINT ["/cardano-p2p"]

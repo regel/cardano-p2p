@@ -1,0 +1,20 @@
+---
+listen-addr: ":8080"
+debug: true
+read-timeout: "1s"
+testnet:
+  enabled: true
+  period-seconds: "1s"
+  fetch-max: 2000
+  endpoint: "http://localhost:6001"
+  magic: 1097911063
+  max-peers: 10
+  default-peer: "relays-new.cardano-testnet.iohkdev.io:3001"
+mainnet:
+  enabled: true
+  period-seconds: "1s"
+  fetch-max: 2000
+  endpoint: "http://localhost:6002"
+  magic: 764824073
+  max-peers: 10
+  default-peer: "relays-new.cardano-mainnet.iohk.io:3001"

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/regel/topology-updater/cmd"
+import "github.com/regel/cardano-p2p/cmd"
 
 func main() {
 	cmd.Execute()
