@@ -90,9 +90,9 @@ echo_meta() {
     tcpprobe=$?
   fi
   metadata=$(curl -Ls --connect-timeout 5 "$url")
-  echo "$metadata" | jq -e .ticker &> /dev/null
+  /bin/echo "$metadata" | jq -e .ticker &> /dev/null
   if [ $? -eq 0 ] && [ -n "$metadata" ]; then
-    hashed=$(b2sum -b -l 256 <<< "$metadata" | cut -d ' ' -f1)
+    hashed=$(/bin/echo -n "$metadata" | b2sum -b -l 256 | cut -d ' ' -f1)
     echo "$metadata" | jq \
 	    --arg publicKey "$pubkey" \
 	    --arg hashed "$hashed" \
