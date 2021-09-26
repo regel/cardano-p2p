@@ -3,4 +3,7 @@
 !go.sum
 !*.go
 !cmd/**/*.go
+!log/**/*.go
+!pkg/**/*.go
+!server/**/*.go
 !scripts/*.sh
