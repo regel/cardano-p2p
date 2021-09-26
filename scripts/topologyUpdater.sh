@@ -42,6 +42,7 @@ usage() {
   exit 1
 }
 
+ENDPOINT=${ENDPOINT:-https://api.clio.one}
 REDIS_USER=${REDIS_USER:-cardano}
 REDIS_HOST=${REDIS_HOST:-localhost}
 REDIS_PORT=${REDIS_PORT:-6379}
@@ -78,10 +79,10 @@ fi
 
 if [[ ${TU_PUSH} = "Y" ]]; then
   if [[ ${IP_VERSION} = "4" || ${IP_VERSION} = "mix" ]]; then
-    STR=$(curl -s -f -4 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
+    STR=$(curl -s -f -4 "${ENDPOINT}/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
   fi
   if [[ ${IP_VERSION} = "6" || ${IP_VERSION} = "mix" ]]; then
-    STR=$(curl -s -f -6 "https://api.clio.one/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
+    STR=$(curl -s -f -6 "${ENDPOINT}/htopology/v1/?port=${CNODE_PORT}&blockNo=${blockNo}&magic=${NWMAGIC}")
   fi
   CODE='"resultcode": "([0-9]*)"'
   CLIENTIP='"clientIp": "([0-9.]*)"'
@@ -103,9 +104,9 @@ fi
 
 if [[ ${TU_FETCH} = "Y" ]]; then
   if [[ ${IP_VERSION} = "4" || ${IP_VERSION} = "mix" ]]; then
-    curl -s --fail-with-body -4 -o "${TOPOLOGY}" "https://api.clio.one/htopology/v1/fetch/?max=${MAX_PEERS}&magic=${NWMAGIC}&ipv=${IP_VERSION}"
+    curl -s --fail-with-body -4 -o "${TOPOLOGY}" "${ENDPOINT}/htopology/v1/fetch/?max=${MAX_PEERS}&magic=${NWMAGIC}&ipv=${IP_VERSION}"
   else
-    curl -s --fail-with-body -6 -o "${TOPOLOGY}" "https://api.clio.one/htopology/v1/fetch/?max=${MAX_PEERS}&magic=${NWMAGIC}&ipv=${IP_VERSION}"
+    curl -s --fail-with-body -6 -o "${TOPOLOGY}" "${ENDPOINT}/htopology/v1/fetch/?max=${MAX_PEERS}&magic=${NWMAGIC}&ipv=${IP_VERSION}"
   fi
   if [[ -n "${CUSTOM_PEERS}" ]]; then
     topo="$(cat "${TOPOLOGY}")"
