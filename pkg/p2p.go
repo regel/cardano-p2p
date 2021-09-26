@@ -105,11 +105,9 @@ func Push(config *server.EndpointConfig, ch chan<- Producer) {
 	rand.Seed(time.Now().UnixNano())
 	push(config, ch)
 	for {
-		select {
-		case <-time.After(config.PeriodSeconds):
-			rand.Seed(time.Now().UnixNano())
-			push(config, ch)
-		}
+		<-time.After(config.PeriodSeconds)
+		rand.Seed(time.Now().UnixNano())
+		push(config, ch)
 	}
 }
 
@@ -211,13 +209,13 @@ func writeFetch(config *server.Config, w http.ResponseWriter, t *FetchRequest, c
 	w.WriteHeader(200)
 	pull := PullPayload{
 		ResultCode: "200",
-		Date:       fmt.Sprintf(time.Now().Format("2006-01-02 15:04:05")),
+		Date:       time.Now().Format("2006-01-02 15:04:05"),
 		ClientIp:   clientIp,
 		IpType:     t.IpVersion,
 		Msg:        "welcome to the topology",
 		Producers:  p,
 	}
-	json.NewEncoder(w).Encode(pull)
+	_ = json.NewEncoder(w).Encode(pull)
 }
 
 func Serve(config *server.Config, testnetChan chan Producer, mainnetChan chan Producer) {
@@ -236,14 +234,14 @@ func Serve(config *server.Config, testnetChan chan Producer, mainnetChan chan Pr
 		}
 		p := PushPayload{
 			ResultCode: "203",
-			Date:       fmt.Sprintf(time.Now().Format("2006-01-02 15:04:05")),
+			Date:       time.Now().Format("2006-01-02 15:04:05"),
 			ClientIp:   clientIp,
 			IpType:     4,
 			Msg:        "welcome to the topology",
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(203)
-		json.NewEncoder(w).Encode(p)
+		_ = json.NewEncoder(w).Encode(p)
 	})
 	mux.HandleFunc("/htopology/v1/fetch/", func(w http.ResponseWriter, r *http.Request) {
 		var i int64

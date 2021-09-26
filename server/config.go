@@ -57,8 +57,9 @@ type Config struct {
 // DefaultConfig returns a config with defaults set
 func DefaultConfig() *Config {
 	return &Config{
-		Debug:       false,
-		ReadTimeout: defaultReadTimeout,
+		Debug:         false,
+		ListenAddress: defaultListenAddr,
+		ReadTimeout:   defaultReadTimeout,
 		Testnet: EndpointConfig{
 			Enabled:       true,
 			PeriodSeconds: defaultPeriodSeconds,

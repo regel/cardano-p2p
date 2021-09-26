@@ -32,8 +32,7 @@ var (
 	date    = "unknown"
 )
 var (
-	logLevel string
-	cfgFile  string
+	cfgFile string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -73,8 +72,7 @@ func initConfig() {
 	logLevel := log.ParseLevel(viper.GetString("log-level"))
 
 	// use zap logger instead of default
-	var zapConfig zap.Config
-	zapConfig = zap.NewProductionConfig()
+	zapConfig := zap.NewProductionConfig()
 	var zapLevel zapcore.Level
 	switch logLevel {
 	case log.Debug:
