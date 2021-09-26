@@ -1,0 +1,30 @@
+Academic tradition requires you to cite works you base your article on.
+If you use programs that use GNU Parallel to process data for an article in a
+scientific publication, please cite:
+
+@software{tange_2021_5233953,
+      author       = {Tange, Ole},
+      title        = {GNU Parallel 20210822 ('Kabul')},
+      month        = Aug,
+      year         = 2021,
+      note         = {{GNU Parallel is a general parallelizer to run
+                       multiple serial command line programs in parallel
+                       without changing them.}},
+      publisher    = {Zenodo},
+      doi          = {10.5281/zenodo.5233953},
+      url          = {https://doi.org/10.5281/zenodo.5233953}
+}
+
+(Feel free to use \nocite{tange_2021_5233953})
+
+This helps funding further development; AND IT WON'T COST YOU A CENT.
+If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
+
+More about funding GNU Parallel and the citation notice:
+https://lists.gnu.org/archive/html/parallel/2013-11/msg00006.html
+https://www.gnu.org/software/parallel/parallel_design.html#Citation-notice
+https://git.savannah.gnu.org/cgit/parallel.git/tree/doc/citation-notice-faq.txt
+
+If you send a copy of your published article to tange@gnu.org, it will be
+mentioned in the release notes of next version of GNU Parallel.
+
