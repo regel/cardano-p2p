@@ -31,7 +31,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=regel/topology-updater
+          DOCKER_IMAGE=regel/cardano-p2p
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
@@ -74,7 +74,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=regel/topology-updater
+          DOCKER_IMAGE=regel/cardano-p2p
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
@@ -119,7 +119,7 @@ jobs:
         name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=regel/topology-updater
+          DOCKER_IMAGE=regel/cardano-p2p
           VERSION=edge
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
