@@ -4,7 +4,7 @@ A CLI application to simplify Cardano node topology files updates.
 
 ## Notice
 
-Curl contains pieces of source code that is Copyright (c) Ole Tange. This [notice](./CITATION) is included here to comply with the distribution terms.
+`cardano-p2p` contains pieces of source code that is Copyright (c) Ole Tange. This [notice](./CITATION) is included here to comply with the distribution terms.
 
 ## Backers
 
