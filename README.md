@@ -12,12 +12,15 @@ A CLI application to simplify Cardano node topology files updates.
 
 ## Backers
 
-Thank you to all our backers! 🙏 [[Become a backer](https://github.com/sponsors/regel)]
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/gh-regel#backer)]
+
+<a href="https://opencollective.com/gh-regel#backers" target="_blank"><img src="https://opencollective.com/gh-regel/backers.svg?width=890"></a>
 
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website. [[Become a sponsor](https://github.com/sponsors/regel)]
+link to your website. [[Become a
+sponsor](https://opencollective.com/gh-regel#sponsor)]
 
 # The Cardano Blockchain Needs A Decentralized Node Discovery Service
 
