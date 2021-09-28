@@ -71,6 +71,8 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 FILE=$1
+TMPDIR="$(mktempd -d)"
+trap 'rm -rf -- "$TMPDIR"' EXIT
 
 echo_meta() {
   IFS=$'\t' read -r pubkey url hash host port <<< "$1"
@@ -89,15 +91,19 @@ echo_meta() {
     timeout $TMOUT bash -c "cat < /dev/null > /dev/tcp/$host/$port" 2>/dev/null
     tcpprobe=$?
   fi
-  metadata=$(curl -Ls --connect-timeout 5 "$url")
-  /bin/echo "$metadata" | jq -e .ticker &> /dev/null
-  if [ $? -eq 0 ] && [ -n "$metadata" ]; then
-    hashed=$(/bin/echo -n "$metadata" | b2sum -b -l 256 | cut -d ' ' -f1)
-    echo "$metadata" | jq \
+  META=$(mktemp --tmpdir="$TMPDIR")
+  curl -Ls -o "$META" \
+	  --max-filesize 1024 \
+	  --max-time 5 \
+	  --connect-timeout 5 "$url"
+  jq -e .ticker "$META" &> /dev/null
+  if [ $? -eq 0 ] && [ -f "$META" ]; then
+    hashed=$(cat "$META" | b2sum -b -l 256 | cut -d ' ' -f1)
+    jq \
 	    --arg publicKey "$pubkey" \
 	    --arg hashed "$hashed" \
 	    --arg probe "$tcpprobe" \
-	    '{metadata: .} + {publicKey: $publicKey} + {extended: {hash: $hashed, probe:$probe}}'
+	    '{metadata: .} + {publicKey: $publicKey} + {extended: {hash: $hashed, probe:$probe}}' "$META"
   fi
 }
 export -f echo_meta
@@ -106,6 +112,7 @@ export -f isValidHost
 export -f isValidIPv4
 export -f isValidIPv6
 export TMOUT
+export TMPDIR
 
 (jq -r '
   .[]
