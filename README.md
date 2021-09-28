@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Go Report Card](https://goreportcard.com/badge/github.com/regel/cardano-p2p)](https://goreportcard.com/report/github.com/regel/cardano-p2p)
 [![Build](https://github.com/regel/cardano-p2p/actions/workflows/build.yaml/badge.svg)](https://github.com/regel/cardano-p2p/actions/workflows/build.yaml)
+[![Docker pulls](https://img.shields.io/docker/pulls/regel/cardano-p2p)](https://hub.docker.com/r/regel/cardano-p2p)
 
 A CLI application to simplify Cardano node topology files updates.
 
