@@ -71,7 +71,7 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 FILE=$1
-TMPDIR="$(mktempd -d)"
+TMPDIR="$(mktemp -d)"
 trap 'rm -rf -- "$TMPDIR"' EXIT
 
 echo_meta() {
