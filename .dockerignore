@@ -4,6 +4,6 @@
 !*.go
 !cmd/**/*.go
 !log/**/*.go
-!pkg/**/*.go
+!pkg/*.go
+!pkg/probe/*.go
 !server/**/*.go
-!scripts/*.sh

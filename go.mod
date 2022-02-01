@@ -6,6 +6,8 @@ replace github.com/regel/cardano-p2p/server => ./server
 
 replace github.com/regel/cardano-p2p/pkg => ./pkg
 
+replace github.com/regel/cardano-p2p/pkg/probe => ./pkg/probe
+
 replace github.com/regel/cardano-p2p/log => ./log
 
 require (
