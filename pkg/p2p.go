@@ -17,7 +17,7 @@ package pkg
 
 import (
 	"context"
-	"fmt"
+	"github.com/regel/cardano-p2p/pkg/probe"
 	"gopkg.in/validator.v1"
 	"math/rand"
 	"net"
@@ -62,46 +62,7 @@ type FetchRequest struct {
 	IpVersion int    `validate:"min=4"`
 }
 
-type PoolMetadata struct {
-	Ticker string `json:"ticker"`
-	Hash   string `json:"hash"`
-	Url    string `json:"url"`
-}
-
-type ExtendedPoolMetadata struct {
-	Hash  string `json:"hash"`
-	Probe string `json:"probe"`
-}
-
-type PoolRelay struct {
-	HostAddr SingleHostAddress `json:"single host address,omitempty"`
-	HostName SingleHostName    `json:"single host name,omitempty"`
-}
-
-type SingleHostAddress struct {
-	Ip6  string `json:"IPv6,omitempty"`
-	Ip4  string `json:"IPv4,omitempty"`
-	Port int    `json:"port,omitempty"`
-}
-
-type SingleHostName struct {
-	DnsName string `json:"dnsName,omitempty"`
-	Port    int    `json:"port,omitempty"`
-}
-
-type Pool struct {
-	PublicKey string               `json:"publicKey"`
-	Cost      float64              `json:"cost"`
-	Metadata  PoolMetadata         `json:"metadata,omitempty"`
-	Vrf       string               `json:"vrf"`
-	Owners    []string             `json:"owners"`
-	Pledge    float64              `json:"pledge"`
-	Margin    float64              `json:"margin"`
-	Relays    []PoolRelay          `json:"relays"`
-	Extended  ExtendedPoolMetadata `json:"extended,omitempty"`
-}
-
-func Push(config *server.EndpointConfig, ch chan<- Producer) {
+func Push(config *server.ClientConfig, ch chan<- Producer) {
 	rand.Seed(time.Now().UnixNano())
 	push(config, ch)
 	for {
@@ -111,66 +72,68 @@ func Push(config *server.EndpointConfig, ch chan<- Producer) {
 	}
 }
 
-func push(config *server.EndpointConfig, ch chan<- Producer) {
-	resp, err := http.Get(fmt.Sprintf("%s/pools.json", config.Endpoint))
+func push(config *server.ClientConfig, ch chan<- Producer) {
+	pools, err := VetPools(config.Endpoint)
 	if err != nil {
 		log.Errorf("Could not get pool data: %v", err)
 		return
 	}
-	var pools []Pool
-	if err := json.NewDecoder(resp.Body).Decode(&pools); err != nil {
-		log.Errorf("Could not decode pool data: %v", err)
-		return
-	}
-	eligible := make([]Producer, 0)
+	rand.Shuffle(len(pools), func(i, j int) { pools[i], pools[j] = pools[j], pools[i] })
 	for _, pool := range pools {
-		if pool.Metadata.Ticker == "" {
-			continue
-		}
-		if pool.Metadata.Hash != pool.Extended.Hash || pool.Extended.Probe != "0" {
-			log.Infof("discarded pool '%s' hash='%s' but was hash='%s' probe=%s", pool.Metadata.Ticker, pool.Metadata.Hash, pool.Extended.Hash, pool.Extended.Probe)
-			continue
-		}
 		for _, relay := range pool.Relays {
-			if relay.HostAddr.Ip4 != "" || relay.HostAddr.Ip6 != "" {
-				if relay.HostAddr.Ip4 != "" {
-					eligible = append(eligible, Producer{
-						Addr:    relay.HostAddr.Ip4,
-						Port:    relay.HostAddr.Port,
+			if relay.Ip4 != nil || relay.Ip6 != nil {
+				if relay.Ip4 != nil {
+					addr := net.JoinHostPort(*relay.Ip4, strconv.Itoa(relay.Port))
+					tcpProbe, err := probe.DoTCPProbe(addr, config.ProbeTimeout)
+					if tcpProbe != probe.Success {
+						log.Errorf("tcp probe to '%s' failed: %v", addr, err)
+						continue
+					}
+					log.Infof("tcp probe to '%s' success", addr)
+					ch <- Producer{
+						Addr:    *relay.Ip4,
+						Port:    relay.Port,
 						Valency: 1,
-					})
-				} else if relay.HostAddr.Ip6 != "" {
-					eligible = append(eligible, Producer{
-						Addr:    relay.HostAddr.Ip6,
-						Port:    relay.HostAddr.Port,
+					}
+				} else if relay.Ip6 != nil {
+					addr := net.JoinHostPort(*relay.Ip6, strconv.Itoa(relay.Port))
+					tcpProbe, err := probe.DoTCPProbe(addr, config.ProbeTimeout)
+					if tcpProbe != probe.Success {
+						log.Errorf("tcp probe to '%s' failed: %v", addr, err)
+						continue
+					}
+					log.Infof("tcp probe to '%s' success", addr)
+					ch <- Producer{
+						Addr:    *relay.Ip6,
+						Port:    relay.Port,
 						Valency: 1,
-					})
+					}
 				}
-			} else if relay.HostName.DnsName != "" {
-				ips, err := net.LookupIP(relay.HostName.DnsName)
+			} else if relay.HostName != nil {
+				addr := net.JoinHostPort(*relay.HostName, strconv.Itoa(relay.Port))
+				tcpProbe, err := probe.DoTCPProbe(addr, config.ProbeTimeout)
+				if tcpProbe != probe.Success {
+					log.Errorf("tcp probe to '%s' failed: %v", addr, err)
+					continue
+				}
+				ips, err := net.LookupIP(*relay.HostName)
 				val := len(ips)
 				if err != nil {
-					val = 1
+					log.Errorf("dns lookup to '%s' failed: %v", addr, err)
+					continue
 				}
-				eligible = append(eligible, Producer{
-					Addr:    relay.HostName.DnsName,
-					Port:    relay.HostName.Port,
+				log.Infof("tcp probe to '%s' success", addr)
+				ch <- Producer{
+					Addr:    *relay.HostName,
+					Port:    relay.Port,
 					Valency: val,
-				})
+				}
 			}
-		}
-	}
-	rand.Shuffle(len(eligible), func(i, j int) { eligible[i], eligible[j] = eligible[j], eligible[i] })
-	for _, addr := range eligible {
-		select {
-		case ch <- addr: // Write to channel unless it is full
-		default:
-			// do nothing. Channel is full
 		}
 	}
 }
 
-func writeFetch(config *server.Config, w http.ResponseWriter, t *FetchRequest, clientIp string, ch chan Producer, defaultPeer string) {
+func writeFetch(config *server.ServerConfig, w http.ResponseWriter, t *FetchRequest, clientIp string, ch chan Producer, defaultPeer string) {
 	p := make([]Producer, 0)
 	for i := t.Max; i > 0; i-- {
 		select {
@@ -218,7 +181,7 @@ func writeFetch(config *server.Config, w http.ResponseWriter, t *FetchRequest, c
 	_ = json.NewEncoder(w).Encode(pull)
 }
 
-func Serve(config *server.Config, testnetChan chan Producer, mainnetChan chan Producer) {
+func Serve(config *server.ServerConfig, ch chan Producer) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/htopology/v1/", func(w http.ResponseWriter, r *http.Request) {
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -269,12 +232,7 @@ func Serve(config *server.Config, testnetChan chan Producer, mainnetChan chan Pr
 			return
 		}
 		magic := uint64(i)
-		max := 0
-		if config.Testnet.NetworkMagic == magic {
-			max = config.Testnet.MaxPeers
-		} else if config.Mainnet.NetworkMagic == magic {
-			max = config.Mainnet.MaxPeers
-		}
+		max := config.MaxPeers
 		if s, ok := r.URL.Query()["max"]; ok {
 			if i, err = strconv.ParseInt(s[0], 10, 64); err != nil {
 				log.Infof("failed to parse max: %v", err)
@@ -303,19 +261,11 @@ func Serve(config *server.Config, testnetChan chan Producer, mainnetChan chan Pr
 			w.WriteHeader(400)
 			return
 		}
-		var ch chan Producer
-		defaultPeer := ""
-		if t.Magic == config.Testnet.NetworkMagic {
-			ch = testnetChan
-			defaultPeer = config.Testnet.DefaultPeer
-		} else if t.Magic == config.Mainnet.NetworkMagic {
-			ch = mainnetChan
-			defaultPeer = config.Mainnet.DefaultPeer
-		} else {
+		if t.Magic != config.NetworkMagic {
 			w.WriteHeader(400)
 			return
 		}
-		writeFetch(config, w, t, clientIp, ch, defaultPeer)
+		writeFetch(config, w, t, clientIp, ch, config.DefaultPeer)
 	})
 
 	httpListener, err := net.Listen("tcp", config.ListenAddress)

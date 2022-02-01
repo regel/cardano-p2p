@@ -26,11 +26,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	testnetChan chan pkg.Producer
-	mainnetChan chan pkg.Producer
-)
-
 var p2pCmd = &cobra.Command{
 	Use:   "p2p",
 	Short: "Run p2p service",
@@ -46,6 +41,7 @@ func init() {
 }
 
 func p2p(cmd *cobra.Command, args []string) {
+	var ch chan pkg.Producer
 	configFile := viper.ConfigFileUsed()
 	config := server.DefaultConfig()
 	if err := config.Load(configFile); err != nil {
@@ -54,14 +50,10 @@ func p2p(cmd *cobra.Command, args []string) {
 	}
 	b, _ := json.Marshal(config)
 	log.Debugf("Config: \n%v", string(b))
-	testnetChan = make(chan pkg.Producer, config.Testnet.FetchMaximum)
-	mainnetChan = make(chan pkg.Producer, config.Mainnet.FetchMaximum)
-	if config.Testnet.Enabled {
-		go pkg.Push(&config.Testnet, testnetChan)
+	ch = make(chan pkg.Producer, config.Client.FetchMaximum)
+	if config.Client.Enabled {
+		go pkg.Push(&config.Client, ch)
 	}
-	if config.Mainnet.Enabled {
-		go pkg.Push(&config.Mainnet, mainnetChan)
-	}
-	pkg.Serve(config, testnetChan, mainnetChan)
+	pkg.Serve(&config.Server, ch)
 	select {} // infinite loop
 }
