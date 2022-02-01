@@ -9,7 +9,8 @@ FROM goboring/golang:1.15.6b5
 ARG GITHUB_TOKEN
 ARG VERSION
 
-RUN curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh
+# goreleaser v1.2.0 checksum fails. See https://github.com/goreleaser/godownloader/issues/207 
+RUN curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sh -s -- v1.1.0
 
 WORKDIR /app
 ADD . .
