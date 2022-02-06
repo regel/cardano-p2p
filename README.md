@@ -9,10 +9,6 @@
 
 A CLI application to simplify Cardano node topology files updates.
 
-## Notice
-
-`cardano-p2p` contains pieces of source code that is Copyright (c) Ole Tange. This [notice](./CITATION) is included here to comply with the distribution terms.
-
 ## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/gh-regel#backer)]
@@ -27,10 +23,10 @@ sponsor](https://opencollective.com/gh-regel#sponsor)]
 
 # The Cardano Blockchain Needs A Decentralized Node Discovery Service
 
-The Cardano blockchain does not have a p2p feature to update topology files,
+The Cardano blockchain does not yet have a production ready p2p feature to update topology files,
 although all required information is registered in the blockchain.
 
-To workaround this limitation, the Cardano community created a centralized API to
+To find a temporary workaround, the Cardano community created a centralized API (known as CLIO1, api.clio.one) to
 exchange node's IP addresses and update their topology files.
 
 The `cardano-p2p` application solves this issue and enables fully decentralized
@@ -39,10 +35,10 @@ topology file updates.
 ## How It Works
 
 The `cardano-p2p` application:
-* Reads registered pool metadata in the Cardano blockchain (testnet and mainnet)
-* Vets the data and ensures the IP and port are reachable
-* Selects valid Cardano node relays to produce valid topology files
-* Selects valid nodes randomly to ensure *fairness* and produce *reliable* Graphs topologies
+* Connects to [Ogmios](https://ogmios.dev/) websocket in order to get registered pool parameters found in the Cardano blockchain
+* Verifies each pool metadata and sends a TCP probe to ensure their IP and port are still reachable
+* Selects Cardano nodes that passed the above test in order to produce valid topology files
+* Serves list of Cardano nodes randomly to ensure *fairness* and produce *reliable* Graphs topologies
 
 ## Backward Compatibility
 
