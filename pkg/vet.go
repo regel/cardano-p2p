@@ -119,7 +119,12 @@ func GetBlockHeight(url string) (*int64, error) {
 
 	msg := buildblockHeightQuery()
 	data, _ := json.Marshal(msg)
-	ws.WriteMessage(websocket.TextMessage, data)
+	err = ws.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+			return nil, fmt.Errorf("unexpected write error %v\n", err)
+		}
+	}
 	_, message, err := ws.ReadMessage()
 	if err != nil {
 		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
@@ -143,7 +148,12 @@ func getPoolParameters(url string, poolId string) (*PoolParameters, error) {
 		return nil, fmt.Errorf("failed to connect to %q: %v\n", url, err)
 	}
 	defer ws.Close()
-	ws.WriteMessage(websocket.TextMessage, data)
+	err = ws.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+			return nil, fmt.Errorf("unexpected write error %v\n", err)
+		}
+	}
 	_, message, err := ws.ReadMessage()
 	if err != nil {
 		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
@@ -210,7 +220,12 @@ func getPoolIds(url string) ([]string, error) {
 
 	msg := buildPoolIdsQuery()
 	data, _ := json.Marshal(msg)
-	ws.WriteMessage(websocket.TextMessage, data)
+	err = ws.WriteMessage(websocket.TextMessage, data)
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+			return nil, fmt.Errorf("unexpected write error %v\n", err)
+		}
+	}
 	_, message, err := ws.ReadMessage()
 	if err != nil {
 		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
