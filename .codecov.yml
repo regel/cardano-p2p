@@ -1,0 +1,6 @@
+coverage:
+  precision: 0
+  round: up
+  range: 60..99
+  ignore:
+    - "bin/"
