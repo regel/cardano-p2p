@@ -4,6 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/regel/cardano-p2p)](https://goreportcard.com/report/github.com/regel/cardano-p2p)
 [![Build](https://github.com/regel/cardano-p2p/actions/workflows/build.yaml/badge.svg)](https://github.com/regel/cardano-p2p/actions/workflows/build.yaml)
 [![Docker pulls](https://img.shields.io/docker/pulls/regel/cardano-p2p)](https://hub.docker.com/r/regel/cardano-p2p)
+[![codecov](https://codecov.io/github/regel/cardano-p2p/coverage.svg)](https://codecov.io/gh/regel/cardano-p2p)
+
 
 A CLI application to simplify Cardano node topology files updates.
 
