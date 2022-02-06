@@ -17,16 +17,6 @@ import (
 
 var mutex sync.Mutex
 
-const (
-	MaxMetadataLen       = 1024 // https://cips.cardano.org/cips/cip6/
-	RequestMaxWaitTime   = 1 * time.Second
-	MaxWorkers           = 16
-	WebsocketMethodName  = "Query"
-	WebsocketServiceName = "p2p"
-	WebsocketQueryType   = "jsonwsp/request"
-	WebsocketVersion     = "1.0"
-)
-
 type Query struct {
 	MethodName  string    `json:"methodname"`
 	ServiceName string    `json:"servicename"`
@@ -41,6 +31,10 @@ type QueryArgs struct {
 
 type PoolIdsResponse struct {
 	Result []string `json:"result"`
+}
+
+type BlockHeightResponse struct {
+	Result *int64 `json:"result"`
 }
 
 type PoolRelay struct {
@@ -85,6 +79,20 @@ func buildPoolIdsQuery() Query {
 	return query
 }
 
+func buildblockHeightQuery() Query {
+	args := QueryArgs{
+		Query: "blockHeight",
+	}
+	query := Query{
+		MethodName:  WebsocketMethodName,
+		ServiceName: WebsocketServiceName,
+		QueryType:   WebsocketQueryType,
+		Version:     WebsocketVersion,
+		QueryArgs:   args,
+	}
+	return query
+}
+
 func buildPoolParametersQuery(poolId string) Query {
 	var poolIds = map[string][]string{
 		"poolParameters": []string{poolId},
@@ -100,6 +108,30 @@ func buildPoolParametersQuery(poolId string) Query {
 		QueryArgs:   args,
 	}
 	return query
+}
+
+func GetBlockHeight(url string) (*int64, error) {
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to %q: %v\n", url, err)
+	}
+	defer ws.Close()
+
+	msg := buildblockHeightQuery()
+	data, _ := json.Marshal(msg)
+	ws.WriteMessage(websocket.TextMessage, data)
+	_, message, err := ws.ReadMessage()
+	if err != nil {
+		if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+			return nil, fmt.Errorf("unexpected read error %v\n", err)
+		}
+	}
+	var blockHeight BlockHeightResponse
+	err = json.Unmarshal(message, &blockHeight)
+	if err != nil {
+		return nil, err
+	}
+	return blockHeight.Result, nil
 }
 
 func getPoolParameters(url string, poolId string) (*PoolParameters, error) {
