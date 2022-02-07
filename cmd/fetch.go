@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -68,6 +69,8 @@ The IP protocol version of expected Cardano nodes addresses`))
 The address of a Redis node to publish topology.json output`))
 	flags.String("topic", defaultRedisTopic, heredoc.Doc(`
 The Redis topic where topology.json output will be published`))
+	flags.String("output", "", heredoc.Doc(`
+Write topology.json output to a file`))
 	flags.String("custom-peers", "", heredoc.Doc(`
 *Additional* custom peers to (IP,port[,valency]) to add to your target topology.json
 eg: "10.0.0.1,3001|10.0.0.2,3002|relays.mydomain.com,3003,3"
@@ -100,6 +103,29 @@ func decodeProducers(arg string) []pkg.Producer {
 		})
 	}
 	return out
+}
+
+func printResult(out string, filename string) {
+	var f *os.File
+	var err error
+	outputToFile := filename != ""
+	if !outputToFile {
+		f = os.Stdout
+	} else {
+		f, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Errorf("Error opening file: '%s'", filename)
+			panic(err)
+		}
+		defer f.Close()
+	}
+	writer := bufio.NewWriter(f)
+	_, err = writer.WriteString(out)
+	if err != nil {
+		fmt.Println("Error writing to buffer")
+		panic(err)
+	}
+	writer.Flush()
 }
 
 func fetch(cmd *cobra.Command, args []string) {
@@ -139,7 +165,9 @@ func fetch(cmd *cobra.Command, args []string) {
 	if err := json.Indent(dst, data, "", "  "); err != nil {
 		panic(err)
 	}
-	fmt.Println(dst.String())
+
+	fname, _ := cmd.Flags().GetString("output")
+	printResult(dst.String(), fname)
 
 	publishAddr, _ := cmd.Flags().GetString("publish-addr")
 	topic, _ := cmd.Flags().GetString("topic")

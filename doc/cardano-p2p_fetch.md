@@ -23,6 +23,7 @@ cardano-p2p fetch [flags]
       --ipv int               The IP protocol version of expected Cardano nodes addresses (default 4)
       --max int               The maximum number of expected Cardano node addresses (default 10)
       --network int           Unique network magic of the Cardano blockchain, eg. 1097911063 for testnet (default 1097911063)
+      --output string         Write topology.json output to a file
       --publish-addr string   The address of a Redis node to publish topology.json output
       --topic string          The Redis topic where topology.json output will be published (default "p2p")
 ```
