@@ -14,7 +14,7 @@ require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/dchest/blake2b v1.0.0
 	github.com/go-redis/redis v6.15.9+incompatible // indirect
-	github.com/go-redis/redis/v8 v8.11.3
+	github.com/go-redis/redis/v8 v8.11.4
 	github.com/gorilla/websocket v1.4.2
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.8.1 // indirect
