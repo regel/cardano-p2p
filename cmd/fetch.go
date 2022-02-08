@@ -112,7 +112,7 @@ func printResult(out string, filename string) {
 	if !outputToFile {
 		f = os.Stdout
 	} else {
-		f, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		f, err = os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Errorf("Error opening file: '%s'", filename)
 			panic(err)
