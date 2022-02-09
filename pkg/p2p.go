@@ -183,6 +183,10 @@ func writeFetch(config *server.ServerConfig, w http.ResponseWriter, t *FetchRequ
 
 func Serve(config *server.ServerConfig, ch chan Producer) {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		return
+	})
 	mux.HandleFunc("/htopology/v1/", func(w http.ResponseWriter, r *http.Request) {
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
